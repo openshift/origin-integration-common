@@ -3,7 +3,7 @@
 set -e
 
 # determine whether DNS resolves the master successfully
-function os::int::post::check_master_accessible() {
+function os::int::pre::check_master_accessible() {
   local master_ca="$1" master_url="$2" output
   if output=$(curl -sSI --stderr - --connect-timeout 2 --cacert "$master_ca" "$master_url"); then
     echo "ok"
@@ -28,7 +28,7 @@ function os::int::post::check_master_accessible() {
 }
 
 # determine whether cert (assumed to be from deployer secret) has specified names
-function os::int::post::cert_should_have_names() {
+function os::int::pre::cert_should_have_names() {
   local file="$1"; shift
   local names=( "$@" )
   local output name cn san missing
@@ -66,4 +66,41 @@ function os::int::post::cert_should_have_names() {
     fi
   fi
   return 0
+}
+
+# check if service account exists and make a context for it named after the account name.
+# assumes cluster created in kubeconfig by os::int::deploy::write_kubeconfig
+# also assumes user has access to read SAs and secrets
+function os::int::pre::check_service_account() {
+  local project="$1" account="$2" output
+  # there's no good way for oc to filter the list of secrets; and there are often several token secrets per SA.
+  # following template prints all tokens for heapster; --sort-by will order them earliest to latest, we will use the last.
+  local sa_token_secret_template="{{range .items}}{{if eq .type \"kubernetes.io/service-account-token\"}}{{if eq \"$account\" (index .metadata.annotations \"kubernetes.io/service-account.name\")}}{{println .data.token}}{{end}}{{end}}{{end}}"
+
+  # check that the SA exists and we can get its token
+  if ! os::int::util::check_exists serviceaccount/"$account" >& /dev/null; then
+    echo "Expected '$account' service account to exist in '$project' project, but it does not."
+    echo "Please ensure you created all the service accounts with:"
+    echo '  $ oc new-app apiman-deployer-account-template'
+    return 1
+  fi
+  if ! output=$(oc get secret --sort-by=metadata.resourceVersion --template="$sa_token_secret_template" 2>&1); then
+    echo "Error getting $account service account token; is the master running and are credentials working? Error from oc get secrets follows:"
+    echo -n "$output"
+    return 1
+  elif [[ -z "${output:-}" ]]; then
+    echo "Could not find $account service account token in $project; does it exist?"
+    return 1
+  fi
+  local token=$(echo -e "$output" | tail -1 | base64 -d)
+
+  # set up a config context using the account and most recent token
+  local context=$(oc config view -o jsonpath="{.current-context}")
+  local cluster=$(oc config view -o jsonpath="{.contexts[?(@.name==\"$context\")].context.cluster}")
+  oc config set-credentials "${account}-serviceaccount" \
+    --token="$token" >& /dev/null
+  oc config set-context "${account}-serviceaccount" \
+    --cluster="${cluster}" \
+    --user="${account}-serviceaccount" \
+    --namespace="${project}" >& /dev/null
 }
