@@ -10,5 +10,5 @@ pip install elasticsearch-curator python-crontab
 yum clean all
 
 mkdir -p ${HOME}
-mkdir -p ${CURATOR_CONF_LOCATION}
-touch ${CURATOR_CONF_LOCATION}/settings
+mkdir -p $(dirname "$CURATOR_CONF_LOCATION")
+touch ${CURATOR_CONF_LOCATION}
