@@ -2,9 +2,8 @@
 # This utility file contains functions that wrap commands to be tested. All wrapper functions run commands
 # in a sub-shell and redirect all output. Tests in test-cmd *must* use these functions for testing.
 
-THIS_DIR="$(dirname $(readlink -f "$0"))"
-source "${THIS_DIR}/text.sh"
-source "${THIS_DIR}/util.sh"
+source "${INTEGRATION_COMMON_ROOT}/bash/testing/text.sh"
+source "${INTEGRATION_COMMON_ROOT}/bash/testing/util.sh"
 
 # expect_success runs the cmd and expects an exit code of 0
 function os::cmd::expect_success() {
@@ -360,7 +359,7 @@ function os::cmd::internal::mark_attempt() {
 function os::cmd::internal::compress_output() {
 	local logfile=$1
 
-	awk -f "${THIS_DIR}/compress.awk" $logfile
+	awk -f "${INTEGRATION_COMMON_ROOT}/bash/testing/compress.awk" $logfile
 }
 
 # os::cmd::internal::print_results pretty-prints the stderr and stdout files
