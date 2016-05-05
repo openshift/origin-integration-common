@@ -25,7 +25,7 @@ allowed_units = {'days': 'days', 'weeks': 'weeks', 'months': 'months'}
 allowed_operations = {'delete': 'delete'}
 curator_settings = {'delete': {}}
 
-filename = os.getenv('CURATOR_CONF_LOCATION', '/etc/curator') + '/settings'
+filename = os.getenv('CURATOR_CONF_LOCATION', '/etc/curator/settings/config.yaml')
 
 decoded = {}
 with open(filename, 'r') as stream:
