@@ -25,21 +25,8 @@ function os::int::util::generate_SA_kube_context() {
     --namespace="$project" >& /dev/null
 }
 
-# invoke oc get with given parameters and fail with error output if nothing comes back.
 function os::int::util::check_exists() {
-  local output object="$1"; shift
-  if ! output=$(oc get "$object" "$@" 2>&1); then
-    echo "Error running oc get $object:"
-    echo -e "$output"
-    echo "The $object API object must exist for a valid deployment."
-    return 1
-  elif [ -z "${output:-}" ]; then
-    echo "oc get $object did not return any of the expected objects."
-    echo "The correct $object API object(s) must exist for a valid deployment."
-    return 1
-  fi
-  echo -e "$output"
-  return 0
+  common/groovy/validation.groovy check_exists "$project" "$@" || return
 }
 
 # take a list of objects and test all of them. if any are missing, fail at the end.

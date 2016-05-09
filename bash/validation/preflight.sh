@@ -78,7 +78,7 @@ function os::int::pre::check_service_account() {
   local sa_token_secret_template="{{range .items}}{{if eq .type \"kubernetes.io/service-account-token\"}}{{if eq \"$account\" (index .metadata.annotations \"kubernetes.io/service-account.name\")}}{{println .data.token}}{{end}}{{end}}{{end}}"
 
   # check that the SA exists and we can get its token
-  if ! os::int::util::check_exists serviceaccount/"$account" >& /dev/null; then
+  if ! os::int::util::check_exists serviceaccounts "$account" >& /dev/null; then
     echo "Expected '$account' service account to exist in '$project' project, but it does not."
     echo "Please ensure you created all the service accounts with:"
     echo '  $ oc new-app apiman-deployer-account-template'
