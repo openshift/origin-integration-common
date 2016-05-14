@@ -1,0 +1,3 @@
+[submodule "openshift-auth-proxy"]
+	path = openshift-auth-proxy
+	url = https://github.com/fabric8io/openshift-auth-proxy
