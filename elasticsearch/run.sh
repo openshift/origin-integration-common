@@ -3,9 +3,10 @@
 set -euo pipefail
 
 mkdir -p /elasticsearch/$CLUSTER_NAME
-ln -s /etc/elasticsearch/secret/searchguard-node-key /elasticsearch/$CLUSTER_NAME/searchguard_node_key.key
-export KEYSTORE_PASSWORD=$(cat /etc/elasticsearch/secret/keystore.password)
-export TRUSTSTORE_PASSWORD=$(cat /etc/elasticsearch/secret/truststore.password)
+secret_dir=/etc/elasticsearch/secret/
+[ -f $secret_dir/searchguard-node-key ] && ln -s $secret_dir/searchguard-node-key /elasticsearch/$CLUSTER_NAME/searchguard_node_key.key
+[ -f $secret_dir/keystore.password ] && export KEYSTORE_PASSWORD=$(cat $secret_dir/keystore.password)
+[ -f $secret_dir/truststore.password ] && export TRUSTSTORE_PASSWORD=$(cat $secret_dir/truststore.password)
 
 # the amount of RAM allocated should be half of available instance RAM.
 # ref. https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html#_give_half_your_memory_to_lucene
