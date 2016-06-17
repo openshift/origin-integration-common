@@ -28,4 +28,4 @@ else
 	exit 1
 fi
 
-/usr/share/elasticsearch/bin/elasticsearch
+exec /usr/share/elasticsearch/bin/elasticsearch
