@@ -9,7 +9,7 @@ import logging
 from crontab import CronTab
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 # log at INFO by default
 logger.setLevel(logging.INFO)
 lh = logging.StreamHandler()
