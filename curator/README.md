@@ -23,32 +23,48 @@ projects that are not specified
 ** runhour: NUMBER - hour of the day in 24 hour format at which to run the 
 curator jobs
 ** runminute: NUMBER - minute of the hour at which to run the curator jobs
-  
-For example, using::           
-      
+** timezone: REQUIRED - String in tzselect(8) or timedatectl(1) format
+
+*NOTE* timezone or CURATOR_RUN_TIMEZONE is **REQUIRED**.  This is because the
+curator pod timezone could be different from the node timezone, the master
+timezone, and/or the timezone where the admin is entering the curator
+configuration.  If you are not sure what is the curator pod timezone, or what
+timezone string you should use, you can check::
+
+    # oc get pods -l component=curator # get the pod name
+    # oc exec $pod -- date +%Z%z
+    UTC+0000
+    # tzselect - this will give you an interactive way to choose a timezone string
+    # timedatectl list-timezones - this will give you a list of all timezone strings
+
+For example, using::
+
     myapp-dev:
      delete:
        days: 1
     
     myapp-qe:
-      delete:                  
-        weeks: 1               
-
-    .operations:               
+      delete:
+        weeks: 1
+    
+    .operations:
       delete:
         weeks: 8
-
+    
     .defaults:
-      delete:                  
-        days: 30               
-      runhour: 0               
-      runminute: 0             
+      delete:
+        days: 30
+      runhour: 0
+      runminute: 0
+      timezone: America/New_York
     ...
 
-Every day, curator will run, and will delete indices in the myapp-dev
-project older than 1 day, and indices in the myapp-qe project older than 1
-week.  All other projects will have their indices deleted after they are 30
-days old.  The curator jobs will run at midnight every day.
+Every day, curator will run, and will delete indices in the myapp-dev project
+older than 1 day, and indices in the myapp-qe project older than 1 week.  All
+other projects will have their indices deleted after they are 30 days old.  The
+curator jobs will run every day at midnight in the America/New\_York timezone,
+regardless of geographical location where the pod is running, or the timezone
+setting of the pod, host, etc.
 
 *WARNING*: Using `months` as the unit
 
@@ -74,6 +90,6 @@ Then mount your created secret as a volume in your Curator DC:
 You can also specify default values for the run hour, run minute, and age in
 days of the indices when processing the curator template.  Use
 `CURATOR_RUN_HOUR` and `CURATOR_RUN_MINUTE` to set the default runhour and
-runminute, and use `CURATOR_DEFAULT_DAYS` to set the default index age. These
-are only used if not specified in the config file.
-
+runminute, `CURATOR_RUN_TIMEZONE` to set the run timezone, and use
+`CURATOR_DEFAULT_DAYS` to set the default index age in days. These are only
+used if not specified in the config file.
