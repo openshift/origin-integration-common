@@ -26,7 +26,7 @@ ADD elasticsearch.repo /etc/yum.repos.d/elasticsearch.repo
 # install the RPMs in a separate step so it can be cached
 RUN rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch && \
     yum install -y --setopt=tsflags=nodocs \
-                java-1.8.0-openjdk \
+                java-1.8.0-openjdk-headless \
                 elasticsearch && \
     yum clean all
 # initial boring elasticsearch.yml is just to enable plugin installation.
