@@ -6,7 +6,7 @@ rpm -q epel-release || yum -y install https://dl.fedoraproject.org/pub/epel/epel
 yum install -y --setopt=tsflags=nodocs \
   python-pip \
   PyYAML
-pip install elasticsearch-curator python-crontab
+pip install 'elasticsearch-curator<4.0' python-crontab
 yum clean all
 
 mkdir -p ${HOME}
