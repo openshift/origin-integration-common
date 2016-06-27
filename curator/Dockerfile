@@ -7,8 +7,6 @@ MAINTAINER OpenShift Development <dev@lists.openshift.redhat.com>
 ENV HOME=/opt/app-root/src \
     ES_HOST=localhost \
     ES_PORT=9200 \
-    CURATOR_CRON_MINUTE=0 \
-    CURATOR_CRON_HOUR=0 \
     ES_CA=/etc/curator/keys/ca \
     ES_CLIENT_CERT=/etc/curator/keys/cert \
     ES_CLIENT_KEY=/etc/curator/keys/key \

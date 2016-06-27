@@ -7,7 +7,8 @@ import time
 import logging
 
 from crontab import CronTab
-from datetime import datetime
+from datetime import datetime, timedelta
+from pytz import timezone
 
 logger = logging.getLogger()
 # log at INFO by default
@@ -30,6 +31,15 @@ filename = os.getenv('CURATOR_CONF_LOCATION', '/etc/curator/settings/config.yaml
 decoded = {}
 with open(filename, 'r') as stream:
     decoded = yaml.load(stream) or {}
+
+tz = None
+try:
+    tz = timezone(decoded.get('.defaults', {}).get('timezone', os.getenv('CURATOR_RUN_TIMEZONE', None)))
+except:
+    tz = None
+if not tz:
+    logger.error('You must specify a timezone for curator to use with the runhour and runminute, otherwise, curator does not know exactly what time to run.  curator might be running in a different timezone than expected.  The timezone must be specified in the tzselect(8) or timedatectl(1) "Region/Locality" format e.g. "America/New_York".  You can specify ".defaults: timezone: value" in the curator config.yaml file, or the CURATOR_RUN_TIMEZONE environment variable.')
+    sys.exit(1)
 
 connection_info = '--host ' + os.getenv('ES_HOST') + ' --port ' + os.getenv('ES_PORT') + ' --use_ssl --certificate ' + os.getenv('ES_CA') + ' --client-cert ' + os.getenv('ES_CLIENT_CERT') + ' --client-key ' + os.getenv('ES_CLIENT_KEY')
 
@@ -122,15 +132,15 @@ if not theminute:
 thehour = int(thehour)
 theminute = int(theminute)
 while True:
-    # get time when next run should happen
-    nextruntime = time.mktime(datetime.now().replace(hour=thehour, minute=theminute,
-                                                     second=0, microsecond=0).timetuple())
-    timenow = time.time()
-    if nextruntime < timenow:
-        # the next runtime is less than now, so run a day from now
-        nextruntime = nextruntime + 86400
-        # else run later today
-    logger.debug("curator hour [%d] minute [%d] nextruntime [%d] now [%d]" % (thehour, theminute, nextruntime, time.time()))
+    # get time when next run should happen - number of seconds until the next thehour and theminute
+    timenow = datetime.now(tz)
+    lastruntime = timenow.replace(hour=thehour, minute=theminute, second=0, microsecond=0)
+    offset = 0
+    if timenow > lastruntime:
+        # run it same time tomorrow
+        offset = 86400
+    untilnextruntime = (lastruntime + timedelta(seconds=offset) - timenow).seconds
+    logger.debug("curator hour [%d] minute [%d] seconds until next runtime [%d] now [%s]" % (thehour, theminute, untilnextruntime, str(timenow)))
     # sleep until then
-    time.sleep(nextruntime - time.time())
+    time.sleep(untilnextruntime)
     run_all_jobs(my_cron)
