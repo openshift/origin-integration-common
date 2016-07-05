@@ -23,13 +23,13 @@ projects that are not specified
 ** runhour: NUMBER - hour of the day in 24 hour format at which to run the 
 curator jobs
 ** runminute: NUMBER - minute of the hour at which to run the curator jobs
-** timezone: REQUIRED - String in tzselect(8) or timedatectl(1) format
+** timezone: STRING - String in tzselect(8) or timedatectl(1) format - the
+   default timezone is the timezone of the curator pod, which by default should
+   be the timezone of the node
 
-*NOTE* timezone or CURATOR_RUN_TIMEZONE is **REQUIRED**.  This is because the
-curator pod timezone could be different from the node timezone, the master
-timezone, and/or the timezone where the admin is entering the curator
-configuration.  If you are not sure what is the curator pod timezone, or what
-timezone string you should use, you can check::
+The curator pod should use the same timezone as its node.  If you are not sure
+what is the curator pod timezone, or what timezone string you should use, you
+can check::
 
     # oc get pods -l component=curator # get the pod name
     # oc exec $pod -- date +%Z%z
@@ -62,7 +62,7 @@ For example, using::
 Every day, curator will run, and will delete indices in the myapp-dev project
 older than 1 day, and indices in the myapp-qe project older than 1 week.  All
 other projects will have their indices deleted after they are 30 days old.  The
-curator jobs will run every day at midnight in the America/New\_York timezone,
+curator jobs will run every day at midnight in the `America/New_York` timezone,
 regardless of geographical location where the pod is running, or the timezone
 setting of the pod, host, etc.
 

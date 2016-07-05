@@ -32,14 +32,14 @@ decoded = {}
 with open(filename, 'r') as stream:
     decoded = yaml.load(stream) or {}
 
+tzstr = decoded.get('.defaults', {}).get('timezone', os.getenv('CURATOR_RUN_TIMEZONE', None))
 tz = None
-try:
-    tz = timezone(decoded.get('.defaults', {}).get('timezone', os.getenv('CURATOR_RUN_TIMEZONE', None)))
-except:
-    tz = None
-if not tz:
-    logger.error('You must specify a timezone for curator to use with the runhour and runminute, otherwise, curator does not know exactly what time to run.  curator might be running in a different timezone than expected.  The timezone must be specified in the tzselect(8) or timedatectl(1) "Region/Locality" format e.g. "America/New_York".  You can specify ".defaults: timezone: value" in the curator config.yaml file, or the CURATOR_RUN_TIMEZONE environment variable.')
-    sys.exit(1)
+if tzstr:
+    try:
+        tz = timezone(tzstr)
+    except:
+        logger.error('The timezone must be specified in the tzselect(8) or timedatectl(1) "Region/Locality" format e.g. "America/New_York" or "UTC".')
+        sys.exit(1)
 
 connection_info = '--host ' + os.getenv('ES_HOST') + ' --port ' + os.getenv('ES_PORT') + ' --use_ssl --certificate ' + os.getenv('ES_CA') + ' --client-cert ' + os.getenv('ES_CLIENT_CERT') + ' --client-key ' + os.getenv('ES_CLIENT_KEY')
 
