@@ -2,7 +2,7 @@ FROM centos:centos7
 
 MAINTAINER OpenShift Development <dev@lists.openshift.redhat.com>
 
-# by default, run the curator cron job at midnight every night, and delete
+# by default, run the curator cron job at midnight UTC every night, and delete
 # indices older than 30 days old
 ENV HOME=/opt/app-root/src \
     ES_HOST=localhost \
@@ -13,7 +13,8 @@ ENV HOME=/opt/app-root/src \
     CURATOR_CONF_LOCATION=/etc/curator/settings/config.yaml \
     CURATOR_DEFAULT_DAYS=30 \
     CURATOR_RUN_HOUR=0 \
-    CURATOR_RUN_MINUTE=0
+    CURATOR_RUN_MINUTE=0 \
+    CURATOR_RUN_TIMEZONE=UTC
 
 LABEL io.k8s.description="Curator elasticsearch container for elasticsearch deletion/archival" \
   io.k8s.display-name="Curator 3.5.1" \

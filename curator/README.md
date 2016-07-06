@@ -24,18 +24,7 @@ projects that are not specified
 curator jobs
 ** runminute: NUMBER - minute of the hour at which to run the curator jobs
 ** timezone: STRING - String in tzselect(8) or timedatectl(1) format - the
-   default timezone is the timezone of the curator pod, which by default should
-   be the timezone of the node
-
-The curator pod should use the same timezone as its node.  If you are not sure
-what is the curator pod timezone, or what timezone string you should use, you
-can check::
-
-    # oc get pods -l component=curator # get the pod name
-    # oc exec $pod -- date +%Z%z
-    UTC+0000
-    # tzselect - this will give you an interactive way to choose a timezone string
-    # timedatectl list-timezones - this will give you a list of all timezone strings
+   default timezone is `UTC`
 
 For example, using::
 

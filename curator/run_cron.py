@@ -32,7 +32,7 @@ decoded = {}
 with open(filename, 'r') as stream:
     decoded = yaml.load(stream) or {}
 
-tzstr = decoded.get('.defaults', {}).get('timezone', os.getenv('CURATOR_RUN_TIMEZONE', None))
+tzstr = decoded.get('.defaults', {}).get('timezone', os.getenv('CURATOR_RUN_TIMEZONE', 'UTC'))
 tz = None
 if tzstr:
     try:
